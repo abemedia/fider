@@ -3,21 +3,18 @@
 #####################
 FROM golang:1.16.2-buster AS server-builder 
 
-ARG buildnumber=local
-ARG TARGETPLATFORM
+ARG BUILDNUMBER=local
+ARG TARGETVARIANT
 
 WORKDIR /server
 
 COPY . .
-RUN BUILDNUMBER=${buildnumber} \
-    GOARCH="$(echo $TARGETPLATFORM | cut -d '/' -f 2)"  \
-    GOARM="$(echo $TARGETPLATFORM | cut -d '/' -f 3 | tail -c 2)" \
-    CGO_ENABLED=0 GOOS=linux make build-server
+RUN GOARM=$(echo "$TARGETVARIANT" | tail -c 2) make build-server
 
 #################
 ### UI Build Step
 #################
-FROM node:14-buster AS ui-builder 
+FROM --platform=linux/amd64 node:14-buster AS ui-builder 
 
 WORKDIR /ui
 
